@@ -1,0 +1,16 @@
+
+* Semantic Actions
+** Recursive Descent
+   The semantic actions are values returned by parsing functions (or plus some side-effects).
+   See a parse example:
+     T -> { T * F }  =>
+     { int a,b; a=T(); eat(TIMES); int b=F(); return a*b; }
+
+
+* Abstract Parse Trees
+** Why
+   Seperate the syntax checking(parsing) and semantic (type-checking & code-generation) is good practice,
+   it is for improving the maitainability of the complier.
+   So we parse the text -> AbstractParseTree -> semantic actions
+** Position 
+   for reporting error.

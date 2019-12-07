@@ -1,0 +1,135 @@
+
+(Tigerbook, Chapter 5 Semantic Analysis)
+
+#+BEGIN_INTRO
+1. Connect variables to their uses
+2. Check each expression has correct type
+3. Translate abstract syntax -> machine code
+#+END_INTRO
+
+
+* Symbol Tables
+** terms 
+   environment: use greeks alphabet in the book, for me, use O instead
+   bindings: |->  just like stanford course 
+   environment is expandable, e.g, O + { a |-> int, b |-> int } means expand O by adding a: int, b: int
+   but expanding envir has order,  X+Y != Y+X (think why)
+
+** what is symbol table use for?
+   image a function:  func(identifier) : { type, localtion }  
+   through symbol table, we knowed the "meaning" of identifiers.
+
+** symbol table in *imperative* style programming language
+    O1 -> (add var a/b) -> O2 ... -> (var a/b destroyed)-> O1
+    Impl by hashtable: (key=var_names, value=stack of *bucket*)
+       bucket = { string key, void* binding, bucket* next } 
+       binding = { void* }, type & var are diff bindings, so use void*
+
+** symbol table in *functional* style programming language
+    diff from imperative, O1 / O2 / O3 .... multiple environments are coexistence 
+    Impl: use Binary Search Tree. 
+    Each Node and its Subnodes is a tree(symbol table)
+    [[./symbol_table_functional_bst.png]]
+    (O1 + mouse -> O2, and now O1 O2 coexists)
+
+** Impl of Symbol Table
+#+BEGIN_SRC C
+
+/*table.h*/
+typedef struct table_ * table;
+table table_empty(void);  // create empty table
+void table_enter(table t, void* key, void* value);
+void* table_look(table t, void* key);
+void* table_pop(table t); 
+/*symbol.h*/
+#include "table.h"   // i removed a lot of driver function for simplicity, check the book to see why.
+typedef struct symbol_* symbol;
+symbol Symbol(string);  // creating a symbol ptr
+string Name(symbol);
+void* look( table t, symbol s );  // return value
+void* begin_scope(table t);  // mark current status
+void* end_scope(table t);  // restore status
+
+/*symbol.c*/
+struct symbol_ { string name; symbol next; };
+int index(string name) {
+    static size_t SIZE = 100;
+    return hash(name) % SIZE;
+}
+// global var store symbols, we have 2 tables: one for type, one for variable
+// do not be confused with hashtable and table, hashtable is for symbol which hash nothing to do with bindings, 
+// this is for every same string, return to same void* to accomplish fast-comparison
+static symbol hashtable[SIZE];  
+symbol Symbol(string name) {
+    int index=index(name);
+    for(symbol s = hashtable[index]; s; s=s->next)
+        if (s->name==name) return s;
+    hashtable[index]=new symbol_();
+    return hashtable[index];
+}
+void* look( table t, symbol s ) { return table_look(t, s); }
+static struct symbol_ mark;  // global var for scope it contains nothing, just use it as an address
+void begin_scope(table t) { table_enter(t, &mark, NULL); }
+void end_scope(table t) { do symbol s = table_pop(t); while (s != &mark); }
+
+#+END_SRC
+
+** Bindings
+*** We have 2 namepaces: 
+     we have 2 environments, so we need 2 tables data structure to store them.
+**** for types ( types.h )
+     1: for predefined types: int / string / nil / record / array
+     2: for user defined types: any other types constructed by *records or arrays* + primitive types
+**** for functions & variables ( env.h ) 
+*** No duck typing in Tiger lang
+*** A type environment is a mapping: symbol -> Type
+*** Environments are used during type-checking phase
+*** Impl environment
+#+BEGIN_SRC C
+/*types.h*/
+typedef struct Type_* Type;
+typedef struct TypeList_* TypeList;
+typedef struct Field_* Field;
+typedef struct FieldList_* FieldList;
+// data structures  
+struct Type_ { 
+    enum { kRecord, kNil,  kInt, kString, kArray, kName, kVoid } kind;
+    union { FieldList record; Type array; struct { Symbol sym; Type t; } name; } un;
+};
+struct TypeList_ { Type head; TypeList tail; };
+struct Field_  { Symbol name; Type type; };
+struct FieldList_ { Field head; FieldList tail; };
+// global, functions returns the Type object 
+Type Nil(void);  // belongs to any record type
+Type Int(void);
+Type String(void);
+Type Void(void);  // refer to no value
+Type Record(FieldList fields);
+Type Array(Type t);
+Type Name(Symbol sym , Type t);
+
+#+END_SRC
+
+#+BEGIN_SRC C
+/*env.h*/
+// Entry is use to contains the information about a value, *not type*
+typedef struct EnvEntry_ *EnvEntry;
+struct EnvEntry_ {
+   enum {varEntry, funEntry } kind;
+   union { 
+       struct { Type ty; } var;
+       struct { TypeList formals; Type Result } fun;
+   } un;
+};
+// a var will map to VarEntry telling its type
+EnvEntry VarEntry(Type t);
+// a function will map to FunEntry telling its info 
+EnvEntry FunEntry(TypeList formals, Type result);
+// create 2 tables, one for value, one for type. as we metioned before
+table BaseTEnv(void);   // contains?
+table BaseVEnv(void);   // contains predefined functions.
+
+#+END_SRC
+
+* Type Checking (for expression)
+* Type Checking (for declaration)

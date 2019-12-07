@@ -1,0 +1,61 @@
+#+TITLE Semantic Analysis
+
+
+#+NOTE from stanford class
+
+* Types
+** Type Checking
+   type checking are base on: if E1 and E2 have certain types => E3 has a certain type.
+*** Notation:
+    '^' means 'and'
+    => means if-then
+    x:T means x has type T
+    (e.g  hypthesis_1 ^ hypthesis_2 ^ ...  hypthesis_n => conclusion)
+*** Another representation:
+      |- Hypothesis ... |- Hypothesis
+    --------------------------------
+                |- Conclusion
+   |-  means "it is provable that..."
+   ( e.g   |- e:T  means  "it is provable that e has type T")
+** Type Environments (SYMBOL TABLES)
+*** free variable:  
+    if var A was not define in a expression E, then we say "A is free in E"
+    free <--opposite--> bound (that var is defined in the expression)
+*** what's it for?
+    type envir give types for free variables
+    type envir is a function (object-identifiers) -> (types)
+*** Notation:
+    O is a function (object-identifiers) -> (types)
+    E.g:  O |- e:T  
+    means: if we assume *variables* have *types* given by O, it's provable that e has type T.
+    or saying: if you tell me the types of free vars (given by O), I can tell you type of e is T.
+    Another notation:
+    - O[T/x](x) = T    // this means in envir O, we specify that x has type T.
+    - O[T/x](y) = O(y) 
+    then we have this (which is very nature if you understand what these fomula means):
+        O[T/x](x) |- e1 : T1
+    ---------------------------
+       O |- let x:T in e1 : T1
+** Subtyping    
+*** notation
+    T0 <= T means T0 is subtype of T
+** Typing Methods
+   method and object identifiers are in DIFF namespace
+*** Notation
+    signature M(C,f) = (T1,T2...Tn,Tn+1) means: class C's function f (T1...Tn) : Tn+1
+*** SELF_TYPE    
+    represents the type of current class C
+** Impl Type Checking
+*** function prototype: 
+    e.g impl this:
+     O,M,C |- e1 : Int   O,M,C |- e2 : Int
+    -------------------------------------
+            O,M,C |- e1+e2 : Int
+    TypeCheck(Envir, e1+e2) = {
+        T1 = TypeCheck(Envir, e1);
+        T2 = TypeCheck(Envir, e2);
+        Check T1 == T2 == Int;
+        return Int;
+    }
+
+#+NOTE from tiger book 
