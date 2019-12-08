@@ -9,27 +9,61 @@ we *cannot* use stack to hold all variables.
 * Stack Frames
 ** Stack Pointer
    stack: big array
-   stack pointer: point at a position of array. localtions beyond pointer are garbage.
+   stack pointer: point at a position of array. locations beyond pointer are garbage.
+
 ** Frame
 [[./stackframe.png]]
+
 ** Registers 
-   problem: machine has limited registers, but many procedures need them.
-   so, registers must be saved before procedure call.
-   e.g, g() -> f(), g or f, which do the save job? both ok!
-      caller-save, g save
-      callee-save, f save
-   it is decided by the machine's manual.
-** Passing Parameters
-   if arg_cnt > k, k args pass by register, others pass by memory
-   in C, arguments are consecutive, this constrains the complier.
-   ways that improve performance of passing args 
-    *leaf procedures*: procedures that do not call any other procedure
-    *interprocedure register allocation*: analyze *all* functions in program at once, then do assignment with optimization
-    or we can *override arg_x if it's finished using*, then we don't have to save it
-    *register windows* (architecture related) 
-    *call by ref*
-** Return address
-   when calling f() returns, it must know when to return(iow, set the stack-poionter of CPU)
-   if calling address is 0x1234, then return address usually is 0x1235, the next addr of calling
-** Escape variable 
-   if a var is passed by ref, then we call it escape.
+*** Facts about register
+    - registers are fast
+    - numbers of registers are limited 
+    - we have to save data (r -> frame) and restore (r <- frame) when do procedure call, this cost much
+*** Reduce the number of save/restore
+    (this is done by Register Allocator)
+    e.g, if var x is useless after calling g(), then do not save it
+    e.g 2, if var x is not accessed during a series calling a() b() c(), do not restore it after each call, just restore once.
+*** Passing Parameters
+    we use f() -> g() to demonstrate seudo code
+**** By Stack(seudo machine code)
+     # alloc g_frame
+     ...
+     # save registers
+     mv f_frame_addr1, r1
+     mv f_frame_addr2, r2
+     ...
+     # pass args by stack, mem->reg->mem
+     mv arg_1, r1
+     mv g_frame_addr1, r1
+     ...
+     # calling g()
+     mv SP, g_entry
+     mv r1, g_frame_addr1
+     ... g's code
+     # finish g(), return
+     mv SP, return_addr
+     # restore registers
+     mv r1, f_frame_addr1
+     mv r2, f_frame_addr2
+     ...
+**** By Register(seudo machine code)
+     # save registers (same)
+     # pass args by register, mem->reg
+     mv arg_1, r1
+     # calling g()
+     mv SP, g_entry
+     ... g's code
+     # As you see, pass by reg reduce many mv operations
+**** How can we take advantage of passing by register?
+     - /leaf function/
+     - /interprocedural register allocation/
+     - variable is useless after calling, so it's register can be /override without saving/
+     - architecture related /register window/
+*** Frame resident variables
+    so, we give preference to Register. but when to store variables in frame?
+    some reasons listed:
+    - a variable will passed by ref, so it has to own an address
+    - value too big for register
+    - array variable
+    - ...
+    
