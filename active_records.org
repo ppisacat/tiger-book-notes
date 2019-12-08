@@ -1,0 +1,35 @@
+
+#+BEGIN INTRO
+function's stack 
+talk about high-order functions: function that returns function
+for languate supports nested function AND functions as returnable values, 
+we *cannot* use stack to hold all variables.
+#+END
+
+* Stack Frames
+** Stack Pointer
+   stack: big array
+   stack pointer: point at a position of array. localtions beyond pointer are garbage.
+** Frame
+[[./stackframe.png]]
+** Registers 
+   problem: machine has limited registers, but many procedures need them.
+   so, registers must be saved before procedure call.
+   e.g, g() -> f(), g or f, which do the save job? both ok!
+      caller-save, g save
+      callee-save, f save
+   it is decided by the machine's manual.
+** Passing Parameters
+   if arg_cnt > k, k args pass by register, others pass by memory
+   in C, arguments are consecutive, this constrains the complier.
+   ways that improve performance of passing args 
+    *leaf procedures*: procedures that do not call any other procedure
+    *interprocedure register allocation*: analyze *all* functions in program at once, then do assignment with optimization
+    or we can *override arg_x if it's finished using*, then we don't have to save it
+    *register windows* (architecture related) 
+    *call by ref*
+** Return address
+   when calling f() returns, it must know when to return(iow, set the stack-poionter of CPU)
+   if calling address is 0x1234, then return address usually is 0x1235, the next addr of calling
+** Escape variable 
+   if a var is passed by ref, then we call it escape.

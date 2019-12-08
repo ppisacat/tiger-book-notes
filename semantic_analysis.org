@@ -74,15 +74,16 @@ void end_scope(table t) { do symbol s = table_pop(t); while (s != &mark); }
 
 #+END_SRC
 
-** Bindings
+** Bindings (what do we store in the symbol table)
 *** We have 2 namepaces: 
-     we have 2 environments, so we need 2 tables data structure to store them.
-**** for types ( types.h )
-     1: for predefined types: int / string / nil / record / array
-     2: for user defined types: any other types constructed by *records or arrays* + primitive types
-**** for functions & variables ( env.h ) 
+     ( so we need 2 tables data structure to store them. )
+     for types ( types.h )
+        1: for predefined types: int / string / nil / record / array
+        2: for user defined types: any other types constructed by *records or arrays* + primitive types
+     for functions & variables ( env.h ) 
 *** No duck typing in Tiger lang
 *** A type environment is a mapping: symbol -> Type
+    the table always return Ty_ty
 *** Environments are used during type-checking phase
 *** Impl environment
 #+BEGIN_SRC C
@@ -107,6 +108,7 @@ Type Void(void);  // refer to no value
 // construct a new Record type object
 Type Record(FieldList fields);
 Type Array(Type t);
+// special type for handling mutually recursive types, refer to types we have not seen, we the name we already know
 Type Name(Symbol sym , Type t);
 
 #+END_SRC
@@ -122,15 +124,25 @@ struct EnvEntry_ {
        struct { TypeList formals; Type Result } fun;
    } un;
 };
-// a var will map to VarEntry telling its type
 EnvEntry VarEntry(Type t);
-// a function will map to FunEntry telling its info 
 EnvEntry FunEntry(TypeList formals, Type result);
-// create 2 tables, one for value, one for type. as we metioned before
-table BaseTEnv(void);   // contains?
-table BaseVEnv(void);   // contains predefined functions.
+table BaseTEnv(void);   // contains types of predefined types (int/string...)
+table BaseVEnv(void);   // contains predefined functions signature info. 
 
 #+END_SRC
 
-* Type Checking (for expression)
-* Type Checking (for declaration)
+* Type Checking
+  Now we have tables, we can start type checking. 
+#+BEGIN_SRC C
+/*semant.h  semant.c*/
+/*RECURSIVE function for AST*/
+// Tr_exp : intermediate code. for variable, Tr_exp is NULL, why?
+// ty: type of the expression's eval result 
+struct expty { Tr_exp exp; Ty_ty ty; }; 
+struct expty transVar(S_table venv, S_tbale tenv, A_var v);
+struct expty transExp(S_table venv, S_tbale tenv, A_exp e);
+// check declaration. add the declarations into venv/tenv
+// for types/vars/funcs
+void              transDec(S_table venv, S_tbale tenv, A_dec d); 
+struct Ty_ty transTy(                        S_tbale tenv, A_ty a);
+#+END_SRC
