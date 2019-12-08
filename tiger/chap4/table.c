@@ -15,7 +15,7 @@ typedef struct binder_ *binder;
 struct binder_ {void *key; void *value; binder next; void *prevtop;};
 struct TAB_table_ {
   binder table[TABSIZE];
-  void *top;
+  void *top;  // what's this for?
 };
 
 

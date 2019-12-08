@@ -15,7 +15,7 @@
    environment is expandable, e.g, O + { a |-> int, b |-> int } means expand O by adding a: int, b: int
    but expanding envir has order,  X+Y != Y+X (think why)
 
-** what is symbol table use for?
+** why symbol table?
    image a function:  func(identifier) : { type, localtion }  
    through symbol table, we knowed the "meaning" of identifiers.
 
@@ -99,11 +99,12 @@ struct Type_ {
 struct TypeList_ { Type head; TypeList tail; };
 struct Field_  { Symbol name; Type type; };
 struct FieldList_ { Field head; FieldList tail; };
-// global, functions returns the Type object 
-Type Nil(void);  // belongs to any record type
+// return the object ptr of these types, since these are pre-defined, so globally, only one instance (static global var)
+Type Nil(void); 
 Type Int(void);
 Type String(void);
 Type Void(void);  // refer to no value
+// construct a new Record type object
 Type Record(FieldList fields);
 Type Array(Type t);
 Type Name(Symbol sym , Type t);
