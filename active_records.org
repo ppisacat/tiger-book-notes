@@ -60,7 +60,7 @@ we *cannot* use stack to hold all variables.
      - variable is useless after calling, so it's register can be /override without saving/
      - architecture related /register window/
 *** Frame resident variables
-    so, we give preference to Register. but when to store variables in frame?
+    so, we give preference to Register. but when we have store variables in frame?
     some reasons listed:
     - a variable will passed by ref, so it has to own an address
     - value too big for register
