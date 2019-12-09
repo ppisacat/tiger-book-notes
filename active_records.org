@@ -1,12 +1,13 @@
 
-#+BEGIN INTRO
+* Intro
 function's stack 
 talk about high-order functions: function that returns function
 for languate supports nested function AND functions as returnable values, 
 we *cannot* use stack to hold all variables.
-#+END
+
 
 * Stack Frames
+
 ** Stack Pointer
    stack: big array
    stack pointer: point at a position of array. locations beyond pointer are garbage.
@@ -15,6 +16,7 @@ we *cannot* use stack to hold all variables.
 [[./stackframe.png]]
 
 ** Registers 
+
 *** Facts about register
     - registers are fast
     - numbers of registers are limited 
@@ -33,7 +35,7 @@ we *cannot* use stack to hold all variables.
      mv f_frame_addr2, r2
      ...
      # pass args by stack, mem->reg->mem
-     mv arg_1, r1
+     mv g_arg_1, r1
      mv g_frame_addr1, r1
      ...
      # calling g()
@@ -42,23 +44,27 @@ we *cannot* use stack to hold all variables.
      ... g's code
      # finish g(), return
      mv SP, return_addr
-     # restore registers
+     mv r1, g_arg_1
+     # return, restore registers
      mv r1, f_frame_addr1
      mv r2, f_frame_addr2
      ...
 **** By Register(seudo machine code)
      # save registers (same)
      # pass args by register, mem->reg
-     mv arg_1, r1
+     mv f_arg_1, r1
      # calling g()
      mv SP, g_entry
+     # callee always want to keep the args in fix location, so it move arg_1 from r2
+     # *this* saves the procedure mv r1, g_frame_addr1
+     mv r1, r2      
      ... g's code
      # As you see, pass by reg reduce many mv operations
-**** How can we take advantage of passing by register?
-     - /leaf function/
-     - /interprocedural register allocation/
-     - variable is useless after calling, so it's register can be /override without saving/
-     - architecture related /register window/
+**** How can we benifits from passing by register?
+     - leaf function
+     - interprocedural register allocation
+     - variable is useless after calling, so it's register can be override without saving
+     - architecture related register window
 *** Frame resident variables
     so, we give preference to Register. but when we have store variables in frame?
     some reasons listed:
@@ -66,4 +72,35 @@ we *cannot* use stack to hold all variables.
     - value too big for register
     - array variable
     - ...
-    
+      
+*** Frames in Tiger Complier
+#+BEGIN_SRC C
+
+/*
+F_frame: info about formal params & local variables
+    - locations of all fromals
+    - instructions required to impl "view shift"
+    - numbers of locals so far 
+    - the label, at which the function's machine code to begin with(SP)
+U_boolList: indicates if the param is escape.
+F_access: formals and locals in frame OR in registers. use to access data.
+F_formals: a function, return the list of F_access, telling where the formals located AT RUNTIME.
+F_newFrame: a function, response to designate: 
+    - where params locate
+    - choose instructions to impl "view shift"
+F_allocLocal(f, TRUE), allocate a local variables in a FRAME f. TRUE: is escape. FALSE: not escape, can be assigned in register
+Exc_FindEscapt function detect if a variable is escape
+*/
+struct F_access_ {
+    enum { inFrame, inReg } kind;
+    union { int offset, Temp_temp reg } u;
+};
+static F_access InFrame(int offset);  // create a access obj with offset in frame
+static F_access InReg(Temp_temp reg); // create a access obj with accessing the specified a register 
+
+#+END_SRC
+
+**** Local variables
+     local var: some in frame, some in register
+
+**** Escape
