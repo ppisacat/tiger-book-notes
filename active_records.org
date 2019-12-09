@@ -101,6 +101,23 @@ static F_access InReg(Temp_temp reg); // create a access obj with accessing the 
 #+END_SRC
 
 **** Local variables
-     local var: some in frame, some in register
+     - InFrame
+     - InReg
 
 **** Escape
+     espcape vars must in frame. 
+
+**** Impl Frame
+     What we actually do, is imple a data structure that:
+     - locate all frames
+     - impl "view shift"
+     - manage local vars  (inframe/inreg)
+     - function's entry point addr assignment
+     
+**** temporaries & labels
+     why (too early to assign real space) / what / how (temp.h)
+
+**** abstraction layer
+     [[./c6_abstract_layer.png]]
+     What's abstracted by each layer?
+
