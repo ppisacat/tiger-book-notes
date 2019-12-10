@@ -1,0 +1,76 @@
+* Intro
+  (This is what I need to impl in mmcq)
+  IR: Intermediate Representation, Machine language's abstraction
+  
+* IR tree
+** What
+   like our Abstract Syntax Tree, but it does not support user define types/functions
+   it only supports extreme simple commands, for 
+     1) easy to produced by semantic analysis phase
+     2) easy to translate to real machine language
+     3) easy to optimize later 
+
+** How (AST->IR Tree)
+#+BEGIN_SRC C
+/*tree.h*/
+typedef struct T_stm_ *T_stm; 
+struct T_stm_ {
+    enum {T_SEQ, T_LABEL, T_JUMP, ..., T_EXP} kind; 
+    union {struct {T_stm left, right;} SEQ; . . . } u; 
+}; 
+
+// T_exp: some value of computation, with side-effects maybe.
+typedef struct T_exp_ *T_exp;
+struct T_exp_ {
+    enum {T_BINOP, T_MEM, T_TEMP, ..., T_CALL} kind;
+    union {struct {T_binOp op; T_exp left, right;} BINOP; . . . } u; 
+}; 
+
+// 2 sequence statements.
+T_stm T_Seq(T_stm left, T_stm right); 
+// define const value of name to machine code. like label definition in asm code
+T_stm T_Label(Temp_label); 
+// tansfer contorl to address exp, 'labels' specifies all possible locations exp can eval to.
+T_stm T_Jump(T_exp exp, Temp_labelList labels); 
+// Conditional Jump
+T_stm T_Cjump(T_relOp op, T_exp left, T_exp right, Temp_label true, Temp_label false); 
+T_stm T_Move(T_exp, T_exp); 
+// eval T_exp and discards the result
+T_stm T_Exp(T_exp);
+
+T_exp T_Binop(T_binOp, T_exp, T_exp); // binary operation 
+T_exp T_Mem(T_exp);           // 'wordSize' contents in memory, used at left -> store to memory, anywhere else -> fetch from memory
+T_exp T_Temp(Temp_temp);      // like registers in real machine, however IR has infinite of them 
+T_exp T_Eseq(T_stm, T_exp);   // ? check book
+T_exp T_Name(Temp_label);     // to an asm lang label
+T_exp T_Const(int);           // integer const value
+T_exp T_Call(T_exp, T_expList);  // a procedure call. if f has subexpression s, s is eval before T_expList 
+
+typedef struct T_expList_ *T_expList; 
+struct T_expList_ {
+    T_exp head; 
+    T_expList tail;
+}; 
+T_expList T_ExpList(T_exp head, T_expList tail);
+
+typedef struct T_stmList_ *T_stmList; 
+struct T_stmList_ {
+    T_stm head; 
+    T_stmList tail;
+}; 
+T_stmList T_StmList (T_stm head, T_stmList tail);
+
+// binary operations
+typedef enum {T_plus, T_minus, T_mul, T_div, T_and, T_or, T_lshift, T_rshift, T_arshift, T_xor} T_binOp ; 
+// relation operations
+typedef enum {T_eq, T_ne, T_lt, T_gt, T_le, T_ge, T_ult, T_ule, T_ugt, T_uge} T_relOp;
+
+#+END_SRC
+
+*** Kind Of Expression
+
+*** Patch List
+    Why & How
+
+*** Define interface between translate <-> semant
+

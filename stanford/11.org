@@ -1,0 +1,10 @@
+
+* Alignment
+  memory alignemnt: 32 bits / 64 bits
+  sometimes we have to add padding to satisfied OS's alignment policy
+
+* Stack Machine
+** Only storage is a STACK
+** Compare to register-machine
+   - (register machine): add r1, r2, r3 -> (stack machine): add
+   - making programs more compact for it doesn't have to store the locations of operands/result -- they're ALWAYS on top of the stack
