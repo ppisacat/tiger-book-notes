@@ -1,9 +1,9 @@
 
 * Intro
-function's stack 
-talk about high-order functions: function that returns function
-for languate supports nested function AND functions as returnable values, 
-we *cannot* use stack to hold all variables.
+  function's stack 
+  talk about high-order functions: function that returns function
+  for languate supports nested function AND functions as returnable values, 
+  we *cannot* use stack to hold all variables.
 
 
 * Stack Frames
@@ -14,6 +14,13 @@ we *cannot* use stack to hold all variables.
 
 ** Frame
 [[./stackframe.png]]
+   Also called Active records, What's frame actually?
+   when a procedure is called, we say it's an activated record.  
+   It contains *ALL* information needed during procedure call.
+   - result 
+   - arguments 
+   - control link (link back to caller address)
+   - return address
 
 ** Registers 
 
@@ -73,7 +80,8 @@ we *cannot* use stack to hold all variables.
     - array variable
     - ...
       
-*** Frames in Tiger Complier
+
+** Frames in Tiger Complier
 #+BEGIN_SRC C
 
 /*
@@ -100,24 +108,24 @@ static F_access InReg(Temp_temp reg); // create a access obj with accessing the 
 
 #+END_SRC
 
-**** Local variables
-     - InFrame
-     - InReg
+*** Local variables
+    - InFrame
+    - InReg
 
-**** Escape
-     espcape vars must in frame. 
+*** Escape
+    espcape vars must in frame. 
 
-**** Impl Frame
-     What we actually do, is imple a data structure that:
-     - locate all frames
-     - impl "view shift"
-     - manage local vars  (inframe/inreg)
-     - function's entry point addr assignment
-     
-**** temporaries & labels
+*** Impl Frame
+    What we actually do, is imple a data structure that:
+    - locate all frames
+    - impl "view shift"
+    - manage local vars  (inframe/inreg)
+    - function's entry point addr assignment
+    
+*** temporaries & labels
      why (too early to assign real space) / what / how (temp.h)
 
-**** abstraction layer
+*** abstraction layer
      [[./c6_abstract_layer.png]]
      What's abstracted by each layer?
 
