@@ -12,7 +12,7 @@
 
 ** How (AST->IR Tree)
 #+BEGIN_SRC C
-/*tree.h*/
+/*tree.h for IRTree*/
 typedef struct T_stm_ *T_stm; 
 struct T_stm_ {
     enum {T_SEQ, T_LABEL, T_JUMP, ..., T_EXP} kind; 
@@ -23,7 +23,7 @@ struct T_stm_ {
 typedef struct T_exp_ *T_exp;
 struct T_exp_ {
     enum {T_BINOP, T_MEM, T_TEMP, ..., T_CALL} kind;
-    union {struct {T_binOp op; T_exp left, right;} BINOP; . . . } u; 
+    union { struct { T_binOp op; T_exp left, right;} BINOP; . . . } u; 
 }; 
 
 // 2 sequence statements.
@@ -41,7 +41,7 @@ T_stm T_Exp(T_exp);
 T_exp T_Binop(T_binOp, T_exp, T_exp); // binary operation 
 T_exp T_Mem(T_exp);           // 'wordSize' contents in memory, used at left -> store to memory, anywhere else -> fetch from memory
 T_exp T_Temp(Temp_temp);      // like registers in real machine, however IR has infinite of them 
-T_exp T_Eseq(T_stm, T_exp);   // ? check book
+T_exp T_Eseq(T_stm, T_exp);   // like T_Seq, but it has a return value for the second seq is a T_exp 
 T_exp T_Name(Temp_label);     // to an asm lang label
 T_exp T_Const(int);           // integer const value
 T_exp T_Call(T_exp, T_expList);  // a procedure call. if f has subexpression s, s is eval before T_expList 
@@ -67,8 +67,61 @@ typedef enum {T_eq, T_ne, T_lt, T_gt, T_le, T_ge, T_ult, T_ule, T_ugt, T_uge} T_
 
 #+END_SRC
 
-*** Kind Of Expression
+#+BEGIN_SRC C
+/*translate.h*/
+typedef struct Tr_exp_ *Tr_exp;
+typedef struct patchList_ *ptchList;
+struct patchList_ { Temp_label*head; patchList tail; };
 
+/*translate.c*/
+// how this works?
+// eval stm, always returns a destination, thus JUMP to that destination
+struct Cx { patchList trues; patchList falses; T_stm stm; };
+struct Tr_exp_ { 
+    enum { Tr_ex, Tr_nx, Tr_cx } kind; 
+    // ex: expression / nx: non-result expr / cx: condition expr
+    union { T_exp ex; T_stm nx, struct Cx cx; } u;
+};
+// constructor of Ex(expression) Nx(no-result) Cx(conditional)
+static Tr_exp Tr_Ex(T_exp ex);
+static Tr_exp Tr_Nx(T_stm ex);
+static Tr_exp Tr_Cx( patchList trues, patchList falses, T_stm stm );
+static patchList PatchList( Temp_label*head, patchList tail );
+
+// these functions are for convert to&back from Tr_exp to T_xxx
+static T_exp unEx(Tr_exp e);
+static T_stm unNx(Tr_exp e);
+static struct Cx unCx(Tr_exp e);
+
+#+END_SRC
+
+#+BEGIN_SRC C
+// demo of translating T_stm s1 to Tr_exp, not understand yet
+#include "tree.h"
+#include "translate.h"
+T_stm s1;
+// get s1 = a>b|c<d, notice, in patchList are labels
+// s1->u.SEQ.left -> a>b
+// s1->u.SEQ.right -> c<d
+// left/right of SEQ are both T_exp
+// (guess) u.CJUMP is a label set, CJUMP.true target to the 'if true' label
+// how to handle the case that, left&right are OR, means their true label are same.
+patchList trues=PatchList(
+    &s1->u.SEQ.left->u.CJUMP.true, 
+    PatchList(
+        &s1->u.SEQ.right->u.SEQ.right->u.CJUMP.true, 
+        NULL));
+patchList falses=PatchList(
+    &s1->u.SEQ.right->u.SEQ.right->u.CJUMP.false, 
+    NULL);
+Tr_exp e1 = Tr_Cx(trues, falses, s1); 
+
+#+END_SRC
+
+[some problems need to be solved]
+*** Kind Of Expression (mapping from AST -> IRTree)
+    AST::A_exp -> Tree::T_exp (has result) /T_stm (no result), so we make T_exp a union+kind
+    
 *** Patch List
     Why & How
 

@@ -77,10 +77,10 @@ void end_scope(table t) { do symbol s = table_pop(t); while (s != &mark); }
 ** Bindings (what do we store in the symbol table)
 *** We have 2 namepaces: 
      ( so we need 2 tables data structure to store them. )
-     for types ( types.h )
+     for types ( types.h ) - tenv
         1: for predefined types: int / string / nil / record / array
         2: for user defined types: any other types constructed by *records or arrays* + primitive types
-     for functions & variables ( env.h ) 
+     for functions & variables ( env.h ) - venv
 *** No duck typing in Tiger lang
 *** A type environment is a mapping: symbol -> Type
     the table always return Ty_ty

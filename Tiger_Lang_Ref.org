@@ -1,0 +1,38 @@
+
+* Declarations
+  decs -> { dec }
+
+  dec -> tydec
+        -> vardec
+        -> fundec
+
+  tydec -> type type-id =  ty
+
+  ty -> type-id
+      -> { tyfields }  ;; here { } means { }
+      -> array of type-id
+
+  tyfields -> ¦Å
+               -> id : type-id { , id : type-id }   ;; here { } means optional, user can use ',' to define multi id
+  
+  vardec -> var id := exp	
+             -> var id : type-id := exp
+
+  fundec -> function id ( tyfields ) = exp	    ;; procedure 
+              -> function id ( tyfields ) : type-id = exp	   ;; function
+
+  lvalue -> id
+             -> lvalue . id     ;; object.attr
+	-> lvalue [exp]  ;; arr [exp]
+  
+  Built-in types: int/string
+
+  Mutually recursive type: 
+
+  Scope Rule: *let* ... vardec  ... *in* exp *end*;
+  
+  Program: program has no arguments, just an expression exp
+
+* Standard Lib
+
+* Sample 

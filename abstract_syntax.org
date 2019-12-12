@@ -11,6 +11,24 @@
 ** Why
    Seperate the syntax checking(parsing) and semantic (type-checking & code-generation) is good practice,
    for improving the maitainability of the complier.
-   So we parse the text -> AbstractParseTree -> semantic actions
-** Position 
-   for reporting error.
+   2 steps: 
+   Code Text -> (grammer checking) -> ( Parsing ) -> AbstractParseTree -> 
+   ( semantic actions(type checking / code gen) ) -> ML
+   *This chapter is about Code Text -> APT*
+
+**  Seudo Code Intuitive
+   yacc pase grammer to rules, here is some demo
+   
+   stm : stm
+   # we call func A_CompoundStm to build an object of stm
+   stm : stm SEMICOLON stm  ->  { $$=A_CompoundStm($1, $3); }
+   # in C, we update global symbol table with ID, which value is $exp
+   stm : ID ASSIGN exp    ->   { update(&table, ID, $3); }  
+   exp : INT  ->  { $$=A_NumExp($1); }  # construct a NumExp obj 
+   exp : ID   ->   { $$=lookup(table, $1); }   # eval ID, seach ID by looking up table.
+   exp : exp PLUS exp   ->   { $$=$1+$3; }   # eval exp 
+   ...
+
+** 
+
+
