@@ -10,7 +10,7 @@
   *BACKEND*
   Control Flow Analysis -> Data Flow Analysis -> Register Allocation -> Code Emission -> Assembler -> 
 Relocate -> Link -> ML
-[[./c1_description_of_phases.png]]
+  [[./c1_description_of_phases.png]]
 
 # convention of C code; A_ means it belongs module A, each module has its unique "namespace"
 # *After init,  never assign value to any variable*
