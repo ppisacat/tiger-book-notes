@@ -2,28 +2,28 @@
 * Declarations
   decs -> { dec }
 
-  dec -> tydec
+  dec   -> tydec
         -> vardec
         -> fundec
 
   tydec -> type type-id =  ty
 
-  ty -> type-id
+  ty  -> type-id
       -> { tyfields }  ;; here { } means { }
       -> array of type-id
 
   tyfields -> ¦Å
-               -> id : type-id { , id : type-id }   ;; here { } means optional, user can use ',' to define multi id
+           -> id : type-id { , id : type-id }   ;; here { } means optional, user can use ',' to define multi id
   
   vardec -> var id := exp	
-             -> var id : type-id := exp
+         -> var id : type-id := exp
 
-  fundec -> function id ( tyfields ) = exp	    ;; procedure 
-              -> function id ( tyfields ) : type-id = exp	   ;; function
+  fundec -> function id ( tyfields ) = exp	           ;; procedure 
+         -> function id ( tyfields ) : type-id = exp	   ;; function
 
   lvalue -> id
-             -> lvalue . id     ;; object.attr
-	-> lvalue [exp]  ;; arr [exp]
+         -> lvalue . id     ;; object.attr
+	 -> lvalue [exp]  ;; arr [exp]
   
   Built-in types: int/string
 

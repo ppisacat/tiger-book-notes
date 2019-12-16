@@ -3,6 +3,13 @@ typedef struct A_exp_ *A_exp;
 typedef struct A_expList_ *A_expList;
 typedef enum { A_plus, A_minus, A_times, A_div } A_binop;
 
+// add this for type string error
+struct A_string_ {
+  char *s;
+  unsigned len;
+};
+typedef struct A_string_ *string;
+
 struct A_stm_ {
   enum { A_compoundStm, A_assignStm, A_printStm } kind;
   union {

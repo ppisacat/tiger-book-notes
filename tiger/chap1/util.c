@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 void *checked_malloc(int len) {
   void *p = malloc(len);
   if (!p) {
